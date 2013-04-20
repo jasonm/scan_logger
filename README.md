@@ -1,5 +1,5 @@
-RfidScanner
-===========
+ScanLogger
+==========
 
 This is designed to run on a Linux system (requires evdev) with multiple USB
 HID RFID readers and network connectivity.
@@ -21,14 +21,14 @@ Local Usage
 * Plug in your USB HID RFID readers.
 * To display reads on to STDOUT:
 
-    bin/rfid_scanner --stdout
+    bin/scan_logger
 
 Remote Server Usage
 -------------------
 
 * To log reads to a remote server:
 
-    bin/rfid_scanner --endpoint=http://myapp.whatever.com/api
+    bin/scan_logger http://myapp.whatever.com/api
 
 * The app will register new readers with the server.
 
@@ -37,21 +37,32 @@ Remote Server Usage
 Server API
 ----------
 
+The API endpoint you specify should support the following subpaths.  For
+example, if you specify http://app.com/api, then you should support
+`POST http://app.com/api/readers`.
+
 * Create a reader:
 
     POST <endpoint>/readers
+    Accept: multipart/form-data
     Params: hostname, identifier
-    Response Type: application/json
-    Response Body: { id: 12345 }
+    Response Type: text/plain
+    Response Body: 12345 (the id of the newly created reader)
     Response Head: 201 CREATED if creating a new reader record
     Response Head: 201 CREATED if an existing reader record was found
 
 * Create a scan:
 
     POST <endpoint>/scans
+    Accept: multipart/form-data
     Params: reader_id, rfid_number, timestamp
     Response Body: None
     Response Head: 201 CREATED
 
-Requests of application/json are accepted.
-Param parsing adheres to Rails param parsing.
+TODO
+====
+
+_ Sometimes it wedges, and I'm not sure why.  I think it only happens
+when unplugging/replugging a lot, but I should test that it works
+fine with lots of scans.  Once it wedges, `kill -TTIN _PID_` to get it
+to dump Thread backtraces.
