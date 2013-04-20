@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'socket'
+require 'couchrest'
+require 'logger'
+require_relative '../lib/couch_logger'
+
+logger = Logger.new(STDOUT)
+logger.debug('CouchLogger agent: starting.')
+
+config_file_path = ENV['CONFIG_FILE'] || File.join(Dir.pwd, '.couch_logger.json')
+config = JSON.parse(File.open(config_file_path).read)
+logger.debug('Configuration loaded.')
+
+couch_logger = CouchLogger.new(config)
+
+running = true
+trap("SIGINT") do
+  logger.debug('Shutting down...')
+  couch_logger.stop 
+  running = false
+end
+
+if couch_logger.any_unregistered_device_tokens?
+  logger.info 'Awesome, you have configured some new devices.'
+  logger.info ''
+  logger.info 'Please find the new registered IDs for these below,'
+  logger.info 'and update your .couch_logger.json to include them:'
+  logger.info ''
+
+  couch_logger.register_new_device_tokens
+  exit
+end
+
+if(config['input'][0][0]) =~ %r{/dev/input/fake_event}
+  require_relative '../lib/fake_rfid_reader'
+  fake_rfid_reader = FakeRfidReader.new(config)
+  couch_logger.rfid_reader = fake_rfid_reader
+
+  couch_logger.register_new_device_tokens
+  couch_logger.start
+
+  interval = 1
+  logger.debug("Emitting fake events every #{interval} second(s)...")
+  while(running) do
+    fake_rfid_reader.emit_fakes
+    sleep interval
+  end
+else
+  logger.debug("Listening for events on attached device(s)...")
+  couch_logger.register_new_device_tokens
+  couch_logger.start
+  interval = 1
+  while(running) do
+    sleep interval
+  end
+end
