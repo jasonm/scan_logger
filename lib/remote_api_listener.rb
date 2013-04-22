@@ -31,7 +31,7 @@ class RemoteApiListener
         @logger.debug response.body
 
         if response.code.to_i == 200 || response.code.to_i == 201
-	  @readers << { 'topology' => topology, 'reader_id' => response.body }
+          @readers << { 'topology' => topology, 'reader_id' => response.body }
           write_readers_config
         end
       end
@@ -66,7 +66,6 @@ class RemoteApiListener
   end
 
   def write_readers_config
-puts "going to write"
     contents = @readers.to_json
     File.open(config_filename, 'w') do |f|
       f.puts contents
