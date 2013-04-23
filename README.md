@@ -4,7 +4,7 @@ ScanLogger
 This is designed to run on a Linux system (requires evdev) with multiple USB
 HID RFID readers and network connectivity.
 
-It reads RFID tag events off the taggers and logs these events to a remote API.
+It reads RFID scans off the readers and logs these to a remote API.
 
 Installation
 ------------
@@ -26,12 +26,12 @@ Local Usage
 Remote Server Usage
 -------------------
 
+* Plug in your USB HID RFID readers.
 * To log reads to a remote server:
 
     bin/scan_logger http://myapp.whatever.com/api
 
 * The app will register new readers with the server.
-
 * The app will save its reader configuration to `./readers.json`
 
 Server API
@@ -62,7 +62,6 @@ example, if you specify http://app.com/api, then you should support
 TODO
 ====
 
-_ Sometimes it wedges, and I'm not sure why.  I think it only happens
-when unplugging/replugging a lot, but I should test that it works
-fine with lots of scans.  Once it wedges, `kill -TTIN _PID_` to get it
-to dump Thread backtraces.
+* Sometimes it wedges, and I'm not sure why.  I think it only happens when
+unplugging/replugging a lot, but I should test that it works fine with lots of
+scans.  Once it wedges, `kill -TTIN _PID_` to get it to dump Thread backtraces.
