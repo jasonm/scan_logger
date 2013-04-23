@@ -49,7 +49,7 @@ class RemoteApiListener
   def scan(topology, rfid_number)
     @logger.info "Scan:       #{topology} #{rfid_number}"
 
-    unless reader = readers.detect { |reader| reader['topology'] == topology }
+    unless reader = @readers.detect { |reader| reader['topology'] == topology }
       @logger.error "Scan received for unregistered reader at topology #{topology} for rfid_number #{rfid_number}"
       return
     end
